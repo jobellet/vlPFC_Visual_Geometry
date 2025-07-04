@@ -11,12 +11,20 @@ def download_figshare_file(code, filename, private_link='', force_download=False
         link = f'https://figshare.com/ndownloader/files/{code}'
     
     if (not os.path.exists(filename)) or force_download:
-        print(f"Downloading {filename}...")
-        urllib.request.urlretrieve(link, filename)
+        print(f"Downloading {filename}")
+        try:
+            urllib.request.urlretrieve(link, filename)
+            if os.path.exists(filename):
+                print(f"Successfully downloaded {filename}.")
+            else:
+                print(f"Error: {filename} not found after download attempt.")
+        except Exception as e:
+            print(f"Failed to download {filename}: {e}")
     else:
-        print(f"{filename} already exists. Skipping download.")
+        print(f"{filename} already exists.")
 
-def download_files(path_to_repo, files_to_download, private_link='', force_download=False):
+def download_files(path_to_repo, files_to_download, private_link=None, force_download=False):
+    
     df = pd.read_csv(os.path.join(path_to_repo,"file_code_mapping.csv"))
     # Create a download folder
     os.makedirs("downloads", exist_ok=True)
@@ -29,7 +37,7 @@ def download_files(path_to_repo, files_to_download, private_link='', force_downl
         code = str(row['Code']).strip()
         if code != "" and code.lower() != "nan":
             full_path = os.path.join("downloads", filename)
-            download_figshare_file(code, full_path, private_link=private_link)
+            download_figshare_file(code, full_path, private_link=private_link if private_link is not None else '')
 
 # Function to unzip file
 def unzip(zip_path, extract_path):
